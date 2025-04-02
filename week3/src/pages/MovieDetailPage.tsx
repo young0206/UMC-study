@@ -75,6 +75,23 @@ export default function MovieDetailPage() {
         <p>{movie?.release_date}</p>
         <p>{movie?.overview}</p>
       </div>
+
+      <h2 className="text-xl font-bold mt-6">감독/출연</h2>
+
+      {!isPending && (
+        <div>
+          {credit?.cast.map((character) => (
+            <div className="p-10 grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <img
+                src={`https://image.tmdb.org/t/p/w200${character.profile_path}`}
+                className="h-30"
+              />
+              <p>{character.name}</p>
+              <p>{character.character}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
