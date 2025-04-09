@@ -1,8 +1,12 @@
+import { postSignin } from "../apis/auth";
+import { LOCAL_STORAGE_KEY } from "../constants/key";
 import useForm from "../hooks/useForm";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { UserSigninInformation, validateSignin } from "../utils/validate";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const { setItem } = useLocalStorage(LOCAL_STORAGE_KEY.accessToken);
   const { values, errors, touched, getInputProps } =
     useForm<UserSigninInformation>({
       initialValue: {
@@ -12,8 +16,15 @@ const LoginPage = () => {
       validate: validateSignin,
     });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log(values);
+    try {
+      const response = await postSignin(values);
+      setItem(response.data.accessToken);
+      console.log(response);
+    } catch (error) {
+      alert(error?.message);
+    }
   };
 
   const isDisabled =
