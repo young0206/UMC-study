@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Credit, Movie } from "../types/movie";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import YouTube from "react-youtube";
 
 export default function MovieDetailPage() {
   const [credit, setCredit] = useState<Credit | null>(null);
@@ -69,11 +70,42 @@ export default function MovieDetailPage() {
         alt={`${movie?.title}의 이미지`}
         className=""
       />
+
       <div className=" justify-center items-center">
         <h2 className="text-lg font-bold leading-snug">{movie?.title}</h2>
-        <p>{movie?.vote_average}</p>
+        <div>
+          {(() => {
+            const stars = Math.round(movie?.vote_average || 0);
+            const starArray = [];
+
+            for (let i = 0; i < 10; i++) {
+              if (i < stars) {
+                starArray.push("★");
+              } else {
+                starArray.push("☆");
+              }
+            }
+
+            return starArray.map((star, index) => (
+              <span key={index}>{star}</span>
+            ));
+          })()}
+        </div>
+
         <p>{movie?.release_date}</p>
         <p>{movie?.overview}</p>
+        <button
+          onClick={() => {
+            <YouTube
+              videoId={movie?.video}
+              onEnd={(e) => {
+                e.target.stopVideo(0);
+              }}
+            />;
+          }}
+        >
+          예고편 ▶
+        </button>
       </div>
 
       <h2 className="text-xl font-bold mt-6">감독/출연</h2>
@@ -82,10 +114,18 @@ export default function MovieDetailPage() {
         <div>
           {credit?.cast.map((character) => (
             <div className="p-10 grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              <img
-                src={`https://image.tmdb.org/t/p/w200${character.profile_path}`}
-                className="h-30"
-              />
+              {character.profile_path &&
+              character.profile_path !== "null" &&
+              character.profile_path !== "" ? (
+                <img
+                  src={`https://image.tmdb.org/t/p/w200${character.profile_path}`}
+                  className="h-30"
+                />
+              ) : (
+                <div className="p-5 grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                  No image
+                </div>
+              )}
               <p>{character.name}</p>
               <p>{character.character}</p>
             </div>
