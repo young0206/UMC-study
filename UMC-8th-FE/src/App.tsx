@@ -18,7 +18,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const publicRoutes: RouteObject[] = [
   {
-    path: "/",
+    path: "",
     element: <HomeLayout />,
     errorElement: <NotFoundPage />,
     children: [

@@ -11,9 +11,8 @@ export type Likes = {
     lpid: number;
 }
 
-export type ResponseLpListDto = CursorBaseResponse<{
-    data: {
-        id: number;
+export type Lp = {
+    id: number;
         title: string;
         content: string;
         thumbnail: string;
@@ -23,5 +22,6 @@ export type ResponseLpListDto = CursorBaseResponse<{
         updatedAt: Date;
         tags: Tag[];
         likes: Likes[];
-    }[];
-}>
+};
+
+export type ResponseLpListDto = CursorBaseResponse<Lp[]>;
