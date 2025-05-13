@@ -12,9 +12,8 @@ function useGetLpList({cursor, search, order, limit}:PaginationDto) {
             cursor, search, order, limit,
         }),
         staleTime: 1000 * 60 * 5, // 5분
-        gcTime: 100 * 60 * 10, // 10분
+        gcTime: 1000 * 60 * 10, // 10분
 
-        //enabled: Boolean(search),
         select: (data) => data.data.data,
     });
 }

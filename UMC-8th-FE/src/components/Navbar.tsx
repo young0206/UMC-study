@@ -10,6 +10,9 @@ const Navbar = () => {
   const [data, setData] = useState<ResponseMyInfoDto | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // 화면 크기 변화 감지
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -27,22 +30,42 @@ const Navbar = () => {
     }
   }, [accessToken]);
 
+  // 화면 크기에 따라 모바일 여부 확인
+  useEffect(() => {
+  const handleResize = () => {
+    const isNowMobile = window.innerWidth <= 768;
+    setIsMobile(isNowMobile);
+
+    // 화면이 작아지거나 커질 때마다 사이드바 닫기
+    setIsSidebarOpen(false);
+  };
+
+  window.addEventListener("resize", handleResize);
+  handleResize(); // 초기 실행
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+  };
+}, []);
+
   const toggleSidebar = () => {
-    setIsSidebarOpen((prevState) => !prevState);
+    setIsSidebarOpen((prevState) => !prevState); // 사이드바 상태 토글
   };
 
   return (
     <>
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-10">
+      <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-50">
         <div className="flex items-center justify-between p-4">
-          <button
-            onClick={toggleSidebar}
-            className="absolute top-4 left-4 z-50 text-white px-3 py-2 rounded"
-          >
-            ☰
-          </button>
+          
+            <button
+              onClick={toggleSidebar}  // 버튼 클릭 시 사이드바 열기/닫기
+              className="absolute top-4 left-4 z-50 text-white px-3 py-2 rounded"
+            >
+              ☰
+            </button>
+          
 
           <Link
             to="/"

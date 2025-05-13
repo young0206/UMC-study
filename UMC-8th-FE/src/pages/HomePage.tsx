@@ -1,58 +1,92 @@
 import { useEffect, useState } from "react";
-import useGetInfiniteLpList from "../hooks/queries/useGetInfiniteLpList";
 import { PAGINATION_ORDER } from "../enums/common";
 import { useInView } from "react-intersection-observer";
 import LpCard from "../components/LpCard/LpCard";
 import LpCardSkeletionList from "../components/LpCard/LpCardSkeletionList";
+import useGetInfiniteLpList from "../hooks/queries/useGetInfiniteLpList";
 
 const HomePage = () => {
   const [search, setSearch] = useState("");
-  // const {data, isPending, isError} = useGetLpList({
-  //   search,
-  //   limit: 20,
-  // });
+  const [order, setOrder] = useState<PAGINATION_ORDER>(PAGINATION_ORDER.desc);
 
   const {
-    data:lps, 
-    isFetching, 
-    hasNextPage, 
-    isPending, 
-    fetchNextPage, 
-    isError
-  } = useGetInfiniteLpList(1, search, PAGINATION_ORDER.desc)
+    data: lps,
+    isFetching,
+    hasNextPage,
+    isPending,
+    fetchNextPage,
+    isError,
+  } = useGetInfiniteLpList(10, search, order);
 
-  // ref, inVew
-  // ref -> 특정한 HTML 요소를 감시할 수 있다
-  // inView -> 그 요소가 화면에 보이면 true
-  const {ref, inView} = useInView({threshold: 0})
+  const { ref, inView } = useInView({ threshold: 0 });
 
   useEffect(() => {
-    if(inView) {
-      !isFetching && hasNextPage && fetchNextPage();
+    if (inView && hasNextPage && !isFetching) {
+      fetchNextPage();
     }
-  }, [inView, isFetching, hasNextPage, fetchNextPage]);
+  }, [inView, hasNextPage, isFetching, fetchNextPage]);
 
-if (isPending) {
-  return <div className={"mt-20"}>Loading...</div>
-}
+  useEffect(() => {
+    if (lps?.pages) {
+      lps.pages.forEach((page, index) => {
+        console.log(`📦 page ${index} data:`, page?.data?.data);
+      });
+    }
+  }, [lps]);
 
-if (isError) {
-  return <div className={"mt-20"}>Error</div>
-}
+  if (isPending) {
+    return <div className="mt-20">Loading...</div>;
+  }
+
+  if (isError) {
+    return <div className="mt-20">Error</div>;
+  }
 
   return (
-  <div className="container mx-auto px-4 py-6">
-    <input value={search} onChange={(e) => setSearch(e.target.value)} />
-    <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"}>
-    {lps?.pages?.map((page) => page.data.data)
-    ?.flat()
-    ?.map((lp) => (
-      <LpCard key={lp.id} lp={lp}/>
-    ))}
-    {isFetching && <LpCardSkeletionList count={20} />}
+    <div className="container mx-auto px-4 py-6">
+      {/* 검색창 */}
+      <input
+        className="mb-4 p-2 border"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="검색어를 입력하세요"
+      />
+
+      {/* 정렬 버튼 */}
+      <div className="mb-4 flex gap-2 justify-end">
+        <button
+          onClick={() => setOrder(PAGINATION_ORDER.desc)}
+          className={`px-4 py-2 border rounded ${
+            order === PAGINATION_ORDER.desc ? "bg-gray-900 text-white" : ""
+          }`}
+        >
+          최신순
+        </button>
+        <button
+          onClick={() => setOrder(PAGINATION_ORDER.asc)}
+          className={`px-4 py-2 border rounded ${
+            order === PAGINATION_ORDER.asc ? "bg-gray-900 text-white" : ""
+          }`}
+        >
+          오래된순
+        </button>
+      </div>
+
+      {/* 카드 리스트 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {lps.pages
+          ?.map((page) => page.data.data)
+          ?.flat()
+          ?.map((lp) => (
+            <LpCard key={lp.id} lp={lp} />
+          ))}
+
+        {isFetching && <LpCardSkeletionList count={20} />}
+      </div>
+
+      <div ref={ref} className="h-2" />
     </div>
-    <div ref={ref} className="h-2"></div>
-  </div>)
+  );
 };
 
 export default HomePage;

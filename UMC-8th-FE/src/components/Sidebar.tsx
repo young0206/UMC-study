@@ -1,9 +1,37 @@
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
-const Sidebar = ({ isOpen, onClose }) => {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // 외부 클릭 시 사이드바 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        onClose(); // 사이드바 닫기
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
   return (
     <div
-      className={`w-64 h-full bg-gray-800 text-white p-4 fixed top-0 left-0 transition-transform ${
+      ref={sidebarRef}
+      className={`z-30 w-64 h-full bg-gray-800 text-white p-4 fixed top-0 left-0 transition-transform duration-300 ease-in-out ${
         isOpen ? "transform-none" : "-translate-x-full"
       }`}
     >
@@ -31,6 +59,5 @@ const Sidebar = ({ isOpen, onClose }) => {
     </div>
   );
 };
-
 
 export default Sidebar;

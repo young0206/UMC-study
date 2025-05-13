@@ -1,5 +1,3 @@
-import React from 'react'
-
 const LpCardSkeleton = () => {
   return (
     <div className='relative rounded-lg overflow-hidden shadow-lg animate-pulse'>
