@@ -30,13 +30,11 @@ const Navbar = () => {
     }
   }, [accessToken]);
 
-  // 화면 크기에 따라 모바일 여부 확인
   useEffect(() => {
   const handleResize = () => {
     const isNowMobile = window.innerWidth <= 768;
     setIsMobile(isNowMobile);
 
-    // 화면이 작아지거나 커질 때마다 사이드바 닫기
     setIsSidebarOpen(false);
   };
 
@@ -49,7 +47,7 @@ const Navbar = () => {
 }, []);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen((prevState) => !prevState); // 사이드바 상태 토글
+    setIsSidebarOpen((prevState) => !prevState);
   };
 
   return (

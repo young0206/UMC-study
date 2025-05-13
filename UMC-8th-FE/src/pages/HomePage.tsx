@@ -44,7 +44,6 @@ const HomePage = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      {/* 검색창 */}
       <input
         className="mb-4 p-2 border"
         value={search}
@@ -52,7 +51,6 @@ const HomePage = () => {
         placeholder="검색어를 입력하세요"
       />
 
-      {/* 정렬 버튼 */}
       <div className="mb-4 flex gap-2 justify-end">
         <button
           onClick={() => setOrder(PAGINATION_ORDER.desc)}
@@ -72,7 +70,6 @@ const HomePage = () => {
         </button>
       </div>
 
-      {/* 카드 리스트 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {lps.pages
           ?.map((page) => page.data.data)
