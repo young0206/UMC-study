@@ -1,50 +1,30 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { ResponseMyInfoDto } from "../types/auth";
 import { useEffect, useState } from "react";
-import { getMyInfo } from "../apis/auth";
 import Sidebar from "./Sidebar";
 
 const Navbar = () => {
-  const { accessToken } = useAuth();
-  const [data, setData] = useState<ResponseMyInfoDto | null>(null);
+  const { accessToken, userInfo } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // 화면 크기 변화 감지
-  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    console.log("네비게이션 바 userInfo 변경:", userInfo);
+  }, [userInfo]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getMyInfo();
-        setData(response);
-      } catch (error) {
-        console.error("내 정보 불러오기 실패:", error);
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setIsSidebarOpen(false);
       }
     };
 
-    if (accessToken) {
-      fetchData();
-    } else {
-      setData(null);
-    }
-  }, [accessToken]);
+    window.addEventListener("resize", handleResize);
+    handleResize();
 
-  useEffect(() => {
-  const handleResize = () => {
-    const isNowMobile = window.innerWidth <= 768;
-    setIsMobile(isNowMobile);
-
-    setIsSidebarOpen(false);
-  };
-
-  window.addEventListener("resize", handleResize);
-  handleResize(); // 초기 실행
-
-  return () => {
-    window.removeEventListener("resize", handleResize);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prevState) => !prevState);
@@ -56,14 +36,12 @@ const Navbar = () => {
 
       <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-50">
         <div className="flex items-center justify-between p-4">
-          
-            <button
-              onClick={toggleSidebar}  // 버튼 클릭 시 사이드바 열기/닫기
-              className="absolute top-4 left-4 z-50 text-white px-3 py-2 rounded"
-            >
-              ☰
-            </button>
-          
+          <button
+            onClick={toggleSidebar}
+            className="absolute top-4 left-4 z-50 text-white px-3 py-2 rounded"
+          >
+            ☰
+          </button>
 
           <Link
             to="/"
@@ -88,12 +66,12 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-            {accessToken && (
+            {accessToken && userInfo && (
               <Link
                 to={"/my"}
                 className="text-gray-700 dark:text-gray-300 hover:text-blue-500"
               >
-                {data?.data.name} 님, 환영합니다.
+                {userInfo.name} 님, 환영합니다.
               </Link>
             )}
             <Link
