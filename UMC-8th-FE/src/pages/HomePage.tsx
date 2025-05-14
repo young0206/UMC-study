@@ -3,11 +3,13 @@ import { PAGINATION_ORDER } from "../enums/common";
 import { useInView } from "react-intersection-observer";
 import LpCard from "../components/LpCard/LpCard";
 import LpCardSkeletionList from "../components/LpCard/LpCardSkeletionList";
-import useGetInfiniteLpList from "../hooks/queries/useGetInfiniteLpList";
+import useGetInfiniteLpList from "../hooks/queries/LpList/useGetInfiniteLpList";
+import LpMakeModal from "../components/LpMakeModal";
 
 const HomePage = () => {
   const [search, setSearch] = useState("");
   const [order, setOrder] = useState<PAGINATION_ORDER>(PAGINATION_ORDER.desc);
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     data: lps,
@@ -50,6 +52,11 @@ const HomePage = () => {
         onChange={(e) => setSearch(e.target.value)}
         placeholder="검색어를 입력하세요"
       />
+      
+      <button onClick={() => setIsOpen(true)} className="z-50 bg-gray-900 w-18 h-18 font-bold text-4xl rounded-full flex items-center justify-center text-white fixed bottom-18 right-5">
+        +
+      </button>
+      <LpMakeModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
 
       <div className="mb-4 flex gap-2 justify-end">
         <button
@@ -82,6 +89,8 @@ const HomePage = () => {
       </div>
 
       <div ref={ref} className="h-2" />
+
+      
     </div>
   );
 };

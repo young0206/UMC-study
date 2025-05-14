@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getLpList } from "../../apis/lp";
-import { PaginationDto } from "../../types/common";
-import { QUERY_KEY } from "../../constants/key";
+import { PaginationDto } from "../../../types/common";
+import { QUERY_KEY } from "../../../constants/key";
+import { getLpList } from "../../../apis/lp";
 
 
 

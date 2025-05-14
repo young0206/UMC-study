@@ -1,5 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import useDeleteAccount from "../hooks/mutations/useDeleteAccount"; // useDeleteAccount 훅 import
+import ConfirmModal from "./ConfirmModal"; // ConfirmModal 컴포넌트 import
 
 interface SidebarProps {
   isOpen: boolean;
@@ -8,6 +10,8 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const { mutate: deleteAccount, isPending } = useDeleteAccount(); // useDeleteAccount 훅을 이용해 계정 삭제 함수 가져오기
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림 상태 관리
 
   // 외부 클릭 시 사이드바 닫기
   useEffect(() => {
@@ -27,6 +31,28 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
+
+  // 계정 삭제 처리 함수
+  const handleDeleteAccount = () => {
+    setIsModalOpen(true); // 모달 열기
+  };
+
+  // 모달에서 삭제 확인 후 처리
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteAccount(); // 계정 삭제 함수 호출
+      setIsModalOpen(false); // 모달 닫기
+      onClose(); // 사이드바 닫기
+    } catch (error) {
+      alert("계정 삭제 실패");
+      console.log(error);
+    }
+  };
+
+  // 모달에서 삭제 취소 후 처리
+  const handleCancelDelete = () => {
+    setIsModalOpen(false); // 모달 닫기
+  };
 
   return (
     <div
@@ -49,13 +75,22 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         </li>
         <li>
           <button
-            onClick={onClose}
+            onClick={handleDeleteAccount} // 계정 삭제 함수 호출
             className="block py-2 px-4 hover:bg-gray-700 rounded"
+            disabled={isPending} // 요청 중에는 버튼 비활성화
           >
-            탈퇴하기
+            {isPending ? "삭제 중..." : "탈퇴하기"} {/* 요청 중에는 '삭제 중...'으로 변경 */}
           </button>
         </li>
       </ul>
+
+      {/* 모달 열기 */}
+      {isModalOpen && (
+        <ConfirmModal
+          onConfirm={handleConfirmDelete} // 삭제 확인 시 계정 삭제
+          onCancel={handleCancelDelete} // 삭제 취소 시 모달 닫기
+        />
+      )}
     </div>
   );
 };

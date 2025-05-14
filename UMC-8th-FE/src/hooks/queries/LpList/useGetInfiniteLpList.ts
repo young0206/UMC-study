@@ -1,15 +1,15 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getLpList } from "../../apis/lp";
-import { QUERY_KEY } from "../../constants/key";
-import { PAGINATION_ORDER } from "../../enums/common";
+import { PAGINATION_ORDER } from "../../../enums/common";
+import { QUERY_KEY } from "../../../constants/key";
+import { getLpList } from "../../../apis/lp";
 
 function useGetInfiniteLpList(
   limit: number,
   search: string,
-  order = PAGINATION_ORDER
+  order: PAGINATION_ORDER = PAGINATION_ORDER.desc // 기본값으로 PAGINATION_ORDER.desc 설정
 ) {
   return useInfiniteQuery({
-    queryKey: [QUERY_KEY.lps, { search, order }], // ✅ 문자열 기반 key
+    queryKey: [QUERY_KEY.lps, { search, order }],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await getLpList({
         cursor: pageParam,
