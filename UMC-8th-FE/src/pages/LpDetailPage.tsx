@@ -4,33 +4,58 @@ import useGetLpDetail from "../hooks/queries/useGetLpDetail";
 import useUpdateLp from "../hooks/mutations/updateLp";
 import useDeleteLp from "../hooks/mutations/deleteLp";
 import Comments from "../components/comments/Comments";
+import { Heart } from "lucide-react";
+import usePostLike from "../hooks/mutations/usePostLike";
+import useDeleteLike from "../hooks/mutations/useDeleteLike";
+import useGetMyInfo from "../hooks/queries/useGetMyInfo";
+import { useAuth } from "../context/AuthContext";
 
 const LpDetailPage = () => {
   const { lpid } = useParams();
   const numericLpId = Number(lpid);
   const navigate = useNavigate(); // useHistory 대신 사용
-
-  const { data: lp, isPending, isError } = useGetLpDetail({ lpid: numericLpId });
+  const { accessToken } = useAuth();
+  const {
+    data: lp,
+    isPending,
+    isError,
+  } = useGetLpDetail({ lpid: numericLpId });
   const { mutate: updateMutate } = useUpdateLp();
   const { mutate: deleteMutate } = useDeleteLp();
 
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(lp?.data.title || "");
   const [newContent, setNewContent] = useState(lp?.data.content || "");
+  const { data: me } = useGetMyInfo(accessToken);
+  const { mutate: likeMutate } = usePostLike();
+  const { mutate: disLikeMutate } = useDeleteLike();
 
   const handleEditClick = () => {
     setIsEditing(true);
   };
 
   const handleSaveClick = async () => {
-  try {
-    await updateMutate(numericLpId); // 수정된 내용 API 호출 (필요한 경우 인자 변경)
-    setIsEditing(false); // 수정 모드 종료
-  } catch (error) {
-    console.error("LP 수정 실패:", error);
-  }
-};
+    try {
+      await updateMutate(numericLpId); // 수정된 내용 API 호출 (필요한 경우 인자 변경)
+      setIsEditing(false); // 수정 모드 종료
+    } catch (error) {
+      console.error("LP 수정 실패:", error);
+    }
+  };
 
+  if (!lpid || isNaN(numericLpId)) {
+    return <>잘못된 접근입니다.</>;
+  }
+
+  const isLiked = lp?.data.likes?.some((like) => like.userId === me?.data.id);
+
+  const handleLikeLp = () => {
+    likeMutate({ lpid: numericLpId });
+  };
+
+  const handleDisLikeLp = () => {
+    disLikeMutate({ lpid: numericLpId });
+  };
 
   const handleDeleteClick = async () => {
     try {
@@ -75,11 +100,18 @@ const LpDetailPage = () => {
           src={lp?.data.thumbnail}
           className="object-cover w-80 h-80 justify-center rounded transition-shadow"
         />
-        
+
         <div>{lp?.data.content}</div>
         <p className="bg-gray-300 to-transparent backdrop-blur-md rounded">
           {lp?.data.tags?.join(", ")}
         </p>
+
+        <button onClick={isLiked ? handleDisLikeLp : handleLikeLp}>
+          <Heart
+            color={isLiked ? "red" : "black"}
+            fill={isLiked ? "red" : "transparent"}
+          />
+        </button>
 
         {isEditing ? (
           <button onClick={handleSaveClick}>저장</button>
