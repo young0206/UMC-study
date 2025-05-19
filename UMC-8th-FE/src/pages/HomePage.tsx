@@ -5,11 +5,14 @@ import LpCard from "../components/LpCard/LpCard";
 import LpCardSkeletionList from "../components/LpCard/LpCardSkeletionList";
 import useGetInfiniteLpList from "../hooks/queries/LpList/useGetInfiniteLpList";
 import LpMakeModal from "../components/LpMakeModal";
+import useDebounce from "../hooks/useDebounce";
+import { SEARCH_DEBOUNCE_DELAY } from "../constants/delay";
 
 const HomePage = () => {
   const [search, setSearch] = useState("");
   const [order, setOrder] = useState<PAGINATION_ORDER>(PAGINATION_ORDER.desc);
   const [isOpen, setIsOpen] = useState(false);
+  const debouncedValue = useDebounce(search, SEARCH_DEBOUNCE_DELAY);
 
   const {
     data: lps,
@@ -18,7 +21,7 @@ const HomePage = () => {
     isPending,
     fetchNextPage,
     isError,
-  } = useGetInfiniteLpList(10, search, order);
+  } = useGetInfiniteLpList(10, debouncedValue, order);
 
   const { ref, inView } = useInView({ threshold: 0 });
 
@@ -52,8 +55,11 @@ const HomePage = () => {
         onChange={(e) => setSearch(e.target.value)}
         placeholder="검색어를 입력하세요"
       />
-      
-      <button onClick={() => setIsOpen(true)} className="z-50 bg-gray-900 w-18 h-18 font-bold text-4xl rounded-full flex items-center justify-center text-white fixed bottom-18 right-5">
+
+      <button
+        onClick={() => setIsOpen(true)}
+        className="z-50 bg-gray-900 w-18 h-18 font-bold text-4xl rounded-full flex items-center justify-center text-white fixed bottom-18 right-5"
+      >
         +
       </button>
       <LpMakeModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
@@ -89,8 +95,6 @@ const HomePage = () => {
       </div>
 
       <div ref={ref} className="h-2" />
-
-      
     </div>
   );
 };
