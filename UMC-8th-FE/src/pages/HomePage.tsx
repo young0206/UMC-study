@@ -7,12 +7,27 @@ import useGetInfiniteLpList from "../hooks/queries/LpList/useGetInfiniteLpList";
 import LpMakeModal from "../components/LpMakeModal";
 import useDebounce from "../hooks/useDebounce";
 import { SEARCH_DEBOUNCE_DELAY } from "../constants/delay";
+import useThrottle from "../hooks/useThrottle";
+import { SCROLL_THROTTLE_DELAY } from "../constants/throttleDelay";
 
 const HomePage = () => {
   const [search, setSearch] = useState("");
   const [order, setOrder] = useState<PAGINATION_ORDER>(PAGINATION_ORDER.desc);
   const [isOpen, setIsOpen] = useState(false);
   const debouncedValue = useDebounce(search, SEARCH_DEBOUNCE_DELAY);
+  const [scrollY, setScrollY] = useState<number>(0);
+
+  const handleScroll = useThrottle(() => {
+    setScrollY(window.scrollY);
+  }, 2000);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  console.log("ScrollY : " + { scrollY } + "px");
 
   const {
     data: lps,
@@ -25,11 +40,13 @@ const HomePage = () => {
 
   const { ref, inView } = useInView({ threshold: 0 });
 
+  const throttledInView = useThrottle(inView, SCROLL_THROTTLE_DELAY);
+
   useEffect(() => {
-    if (inView && hasNextPage && !isFetching) {
+    if (throttledInView && hasNextPage && !isFetching) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetching, fetchNextPage]);
+  }, [throttledInView, hasNextPage, isFetching, fetchNextPage]);
 
   useEffect(() => {
     if (lps?.pages) {
