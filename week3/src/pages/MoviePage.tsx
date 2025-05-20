@@ -4,6 +4,8 @@ import { Movie, MovieResponse } from "../types/movie";
 import MovieCard from "../components/MovieCard";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useParams } from "react-router-dom";
+import { THEME, useTheme } from "../components/context/ThemeProvider";
+import clsx from "clsx";
 
 export default function MoviePage() {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -13,6 +15,8 @@ export default function MoviePage() {
   const [isError, setIsError] = useState(false);
   //3. 페이지
   const [page, setPage] = useState(1);
+  const { theme } = useTheme();
+  const isLightMode = theme === THEME.LIGHT;
 
   const { category } = useParams<{
     category: string;
@@ -45,26 +49,33 @@ export default function MoviePage() {
 
   if (isError) {
     return (
-      <div>
-        <span className="text-red-500 text-2xl">에러가 발생했습니다.</span>
+      <div className={clsx("p-4", isLightMode ? "text-red-500" : "text-red-400")}>
+        <span className="text-2xl">에러가 발생했습니다.</span>
       </div>
     );
   }
 
   return (
-    <>
+    <div className={clsx("min-h-screen", isLightMode ? "bg-white" : "1a1a1a")}>
       <div className="flex items-center justify-center gap-6 mt-5">
         <button
-          className="bg-[#dda5e3] text-white px-6 py-3 rounded-lg shadow-md
-          hover:bg-[#b2dab1] transition-all duration-200 disabled:bg-gray-300
-          cursor-pointer disabled:cursor-not-allowed"
+          className={clsx(
+            "px-6 py-3 rounded-lg shadow-md transition-all duration-200 disabled:cursor-not-allowed",
+            isLightMode
+              ? "bg-[#dda5e3] text-white hover:bg-[#b2dab1] disabled:bg-gray-300"
+              : "bg-[#b2dab1] text-gray-900 hover:bg-[#dda5e3] disabled:bg-gray-600"
+          )}
           disabled={page === 1}
           onClick={() => setPage((prev) => prev - 1)}
         >{`<`}</button>
-        <span>{page} 페이지</span>
+        <span className={isLightMode ? "text-gray-900" : "text-white"}>{page} 페이지</span>
         <button
-          className="bg-[#dda5e3] text-white px-6 py-3 rounded-lg shadow-md
-        hover:bg-[#b2dab1] transition-all duration-200 cursor-pointer"
+          className={clsx(
+            "px-6 py-3 rounded-lg shadow-md transition-all duration-200",
+            isLightMode
+              ? "bg-[#dda5e3] text-white hover:bg-[#b2dab1]"
+              : "bg-[#b2dab1] text-gray-900 hover:bg-[#dda5e3]"
+          )}
           onClick={() => setPage((prev) => prev + 1)}
         >{`>`}</button>
       </div>
@@ -81,6 +92,6 @@ export default function MoviePage() {
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -1,4 +1,7 @@
 import { NavLink } from "react-router-dom";
+import clsx from "clsx";
+import ThemeToggleButton from "./ThemeToggleButton";
+import { THEME, useTheme } from "./context/ThemeProvider";
 
 const LINKS = [
   { to: "/", label: "홈" },
@@ -9,19 +12,28 @@ const LINKS = [
 ];
 
 export const Navbar = () => {
+  const { theme } = useTheme();
+  const isLightMode = theme === THEME.LIGHT;
+
   return (
-    <div className="flex gap-3 p-4">
+    <div className={clsx("flex gap-3 p-4", isLightMode ? "bg-white" : "1a1a1a")}>
       {LINKS.map(({ to, label }) => (
         <NavLink
           key={to}
           to={to}
           className={({ isActive }) => {
-            return isActive ? "text-[#b2dab1] font-bold" : "text-gray-500";
+            return clsx(
+              isActive ? "text-[#b2dab1] font-bold" : "text-gray-500",
+              isLightMode ? "hover:text-black" : "hover:text-white"
+            );
           }}
         >
           {label}
         </NavLink>
       ))}
+      <div className="ml-auto">
+        <ThemeToggleButton />
+      </div>
     </div>
   );
 };
