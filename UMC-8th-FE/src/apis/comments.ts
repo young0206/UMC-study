@@ -3,14 +3,19 @@
 import { ResponseCommentsListDto } from "../types/comments";
 import { PaginationDto } from "../types/common";
 import { axiosInstance } from "./axios";
+import { PAGINATION_ORDER } from "../enums/common";
 
 // 댓글 목록을 가져오는 함수
 export const getComments = async ({
   lpid,
+  order = PAGINATION_ORDER.desc,
 }: {
   lpid: number;
+  order?: PAGINATION_ORDER;
 }): Promise<ResponseCommentsListDto> => {
-  const { data } = await axiosInstance.get(`/v1/lps/${lpid}/comments`);
+  const { data } = await axiosInstance.get(`/v1/lps/${lpid}/comments`, {
+    params: { order },
+  });
   return data;
 };
 

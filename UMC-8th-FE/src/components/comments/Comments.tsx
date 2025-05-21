@@ -23,8 +23,8 @@ const Comments = () => {
   const [myId, setMyId] = useState<number | null>(null);
 
   const { data: commentsData, isPending, isError } = useQuery({
-    queryKey: [QUERY_KEY.comments, numericLpId],
-    queryFn: () => getComments({ lpid: numericLpId }),
+    queryKey: [QUERY_KEY.comments, numericLpId, order],
+    queryFn: () => getComments({ lpid: numericLpId, order }),
   });
 
   const { mutate: postComment, isPending: isPosting } = usePostComment();

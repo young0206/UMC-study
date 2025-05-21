@@ -53,7 +53,7 @@ export const posteLp = async (): Promise<ResponseLikeLpDto> => {
 
 export const deleteAccount = async (
 ): Promise<ResponseLikeLpDto> => {
-  const { data } = await axiosInstance.delete(`/v1/user`);
+  const { data } = await axiosInstance.delete(`/v1/users`);
 
   return data;
 };
