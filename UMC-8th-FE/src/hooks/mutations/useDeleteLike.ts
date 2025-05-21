@@ -40,6 +40,19 @@ function useDeleteLike() {
 
       return { previousLpPost, newLpPost };
     },
+    onError: (err, lp, context) => {
+      if (context?.previousLpPost) {
+        queryClient.setQueryData(
+          [QUERY_KEY.lpDetail, lp.lpid],
+          context.previousLpPost
+        );
+      }
+    },
+    onSettled: (data, error, lp) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.lpDetail, lp.lpid],
+      });
+    },
   });
 }
 

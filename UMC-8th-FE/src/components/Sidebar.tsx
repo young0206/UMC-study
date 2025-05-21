@@ -10,8 +10,8 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const { mutate: deleteAccount, isPending } = useDeleteAccount(); // useDeleteAccount 훅을 이용해 계정 삭제 함수 가져오기
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림 상태 관리
+  const { mutate: deleteAccountMutate, isPending } = useDeleteAccount();
 
   // 외부 클릭 시 사이드바 닫기
   useEffect(() => {
@@ -40,7 +40,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   // 모달에서 삭제 확인 후 처리
   const handleConfirmDelete = async () => {
     try {
-      await deleteAccount(); // 계정 삭제 함수 호출
+      await deleteAccountMutate(); // 계정 삭제 함수 호출
       setIsModalOpen(false); // 모달 닫기
       onClose(); // 사이드바 닫기
     } catch (error) {

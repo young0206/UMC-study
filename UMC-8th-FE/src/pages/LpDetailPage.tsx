@@ -1,46 +1,70 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // useNavigate로 변경
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import useGetLpDetail from "../hooks/queries/useGetLpDetail";
-import useUpdateLp from "../hooks/mutations/updateLp";
-import useDeleteLp from "../hooks/mutations/deleteLp";
+import useUpdateLp from "../hooks/mutations/useUpdateLp";
 import Comments from "../components/comments/Comments";
 import { Heart } from "lucide-react";
 import usePostLike from "../hooks/mutations/usePostLike";
 import useDeleteLike from "../hooks/mutations/useDeleteLike";
 import useGetMyInfo from "../hooks/queries/useGetMyInfo";
 import { useAuth } from "../context/AuthContext";
+import useDeleteLp from "../hooks/mutations/usedeleteLp";
+import { queryClient } from "../App";
+import { QUERY_KEY } from "../constants/key";
 
 const LpDetailPage = () => {
   const { lpid } = useParams();
+  const navigate = useNavigate();
   const numericLpId = Number(lpid);
-  const navigate = useNavigate(); // useHistory 대신 사용
   const { accessToken } = useAuth();
   const {
     data: lp,
     isPending,
     isError,
-  } = useGetLpDetail({ lpid: numericLpId });
-  const { mutate: updateMutate } = useUpdateLp();
-  const { mutate: deleteMutate } = useDeleteLp();
+  } = useGetLpDetail({ lpid: numericLpId, queryKey: QUERY_KEY.lps });
 
   const [isEditing, setIsEditing] = useState(false);
-  const [newTitle, setNewTitle] = useState(lp?.data.title || "");
-  const [newContent, setNewContent] = useState(lp?.data.content || "");
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
   const { data: me } = useGetMyInfo(accessToken);
   const { mutate: likeMutate } = usePostLike();
   const { mutate: disLikeMutate } = useDeleteLike();
+  const { mutate: deleteLpMutate } = useDeleteLp();
+  const { mutate: updateLpMutate } = useUpdateLp();
+
+  useEffect(() => {
+    if (lp?.data) {
+      setNewTitle(lp.data.title);
+      setNewContent(lp.data.content);
+    }
+  }, [lp?.data]);
 
   const handleEditClick = () => {
     setIsEditing(true);
   };
 
-  const handleSaveClick = async () => {
-    try {
-      await updateMutate(numericLpId); // 수정된 내용 API 호출 (필요한 경우 인자 변경)
-      setIsEditing(false); // 수정 모드 종료
-    } catch (error) {
-      console.error("LP 수정 실패:", error);
-    }
+  const handleUpdateLp = () => {
+    updateLpMutate(
+      {
+        lpid: numericLpId,
+        title: newTitle,
+        content: newContent,
+        tags: lp?.data.tags.map(tag => tag.name) || [],
+      },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+          queryClient.invalidateQueries({
+            queryKey: [QUERY_KEY.lps, numericLpId],
+            exact: true,
+          });
+        },
+        onError: (error: Error) => {
+          console.error("LP 수정 실패:", error);
+          alert("LP 수정에 실패했습니다.");
+        },
+      }
+    );
   };
 
   if (!lpid || isNaN(numericLpId)) {
@@ -57,12 +81,20 @@ const LpDetailPage = () => {
     disLikeMutate({ lpid: numericLpId });
   };
 
-  const handleDeleteClick = async () => {
-    try {
-      await deleteMutate(numericLpId); // LP 삭제 API 호출
-      navigate("/lps"); // LP 삭제 후 목록 페이지로 이동
-    } catch (error) {
-      console.error("LP 삭제 실패:", error);
+  const handleDeleteLp = () => {
+    if (window.confirm("정말로 이 LP를 삭제하시겠습니까?")) {
+      deleteLpMutate(
+        { lpid: numericLpId },
+        {
+          onSuccess: () => {
+            navigate("/");
+          },
+          onError: (error) => {
+            console.error("LP 삭제 실패:", error);
+            alert("LP 삭제에 실패했습니다.");
+          },
+        }
+      );
     }
   };
 
@@ -78,7 +110,7 @@ const LpDetailPage = () => {
             <input
               type="text"
               value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)} // 수정된 제목 관리
+              onChange={(e) => setNewTitle(e.target.value)}
               className="bg-transparent border-b-2 border-white"
             />
           ) : (
@@ -89,7 +121,7 @@ const LpDetailPage = () => {
         {isEditing ? (
           <textarea
             value={newContent}
-            onChange={(e) => setNewContent(e.target.value)} // 수정된 내용 관리
+            onChange={(e) => setNewContent(e.target.value)}
             className="bg-transparent border-b-2 border-white p-2 w-full"
           />
         ) : (
@@ -101,12 +133,21 @@ const LpDetailPage = () => {
           className="object-cover w-80 h-80 justify-center rounded transition-shadow"
         />
 
-        <div>{lp?.data.content}</div>
-        <p className="bg-gray-300 to-transparent backdrop-blur-md rounded">
-          {lp?.data.tags?.join(", ")}
-        </p>
+        <div className="flex flex-wrap gap-2 mt-4 mb-4">
+          {lp?.data.tags.map((tag) => (
+            <span
+              key={tag.id}
+              className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
+            >
+              #{tag.name}
+            </span>
+          ))}
+        </div>
 
-        <button onClick={isLiked ? handleDisLikeLp : handleLikeLp}>
+        <button
+          className="gap-2 mb-4"
+          onClick={isLiked ? handleDisLikeLp : handleLikeLp}
+        >
           <Heart
             color={isLiked ? "red" : "black"}
             fill={isLiked ? "red" : "transparent"}
@@ -114,12 +155,22 @@ const LpDetailPage = () => {
         </button>
 
         {isEditing ? (
-          <button onClick={handleSaveClick}>저장</button>
+          <button onClick={handleUpdateLp}>저장</button>
         ) : (
-          <>
-            <button onClick={handleEditClick}>수정</button>
-            <button onClick={handleDeleteClick}>삭제</button>
-          </>
+          <div className="flex gap-2">
+            <button
+              className="bg-white text-black px-4 py-2 rounded whitespace-nowrap"
+              onClick={handleEditClick}
+            >
+              수정
+            </button>
+            <button
+              className="bg-white text-black px-4 py-2 rounded whitespace-nowrap gap-2"
+              onClick={handleDeleteLp}
+            >
+              삭제
+            </button>
+          </div>
         )}
       </div>
       <Comments />

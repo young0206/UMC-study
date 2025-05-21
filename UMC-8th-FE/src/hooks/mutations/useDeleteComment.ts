@@ -3,15 +3,16 @@ import { deleteComment } from "../../apis/comments";
 import { queryClient } from "../../App";
 import { QUERY_KEY } from "../../constants/key";
 
-function useDeleteComment() {
+const useDeleteComment = () => {
   return useMutation({
     mutationFn: deleteComment,
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      console.log('댓글 삭제 성공');
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.comments] as const,
+        queryKey: [QUERY_KEY.comments, variables.lpid],
       });
     },
   });
-}
+};
 
 export default useDeleteComment;

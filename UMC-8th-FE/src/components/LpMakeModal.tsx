@@ -1,5 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
+import usePostLp from "../hooks/mutations/usePostLp";
+import { AxiosError } from "axios";
+import { axiosInstance } from "../apis/axios";
 
 interface LpMakeModalProps {
   isOpen: boolean;
@@ -13,19 +15,51 @@ const LpMakeModal = ({ isOpen, onClose }: LpMakeModalProps) => {
   const [tagInput, setTagInput] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { mutate: postLpMutate } = usePostLp();
 
-  const handleSubmit = () => {
-    if (thumbnail) {
-      const formData = new FormData();
-      formData.append("file", thumbnail);
-      axios
-        .post("/upload-endpoint", formData)
-        .then((response) => {
-          console.log("이미지 업로드 성공:", response);
-        })
-        .catch((error) => {
-          console.error("이미지 업로드 실패:", error);
+  const handlePostLp = async () => {
+    if (!title.trim() || !content.trim()) {
+      return;
+    }
+
+    try {
+      let thumbnailUrl = "";
+      if (thumbnail) {
+        const formData = new FormData();
+        formData.append("file", thumbnail);
+        const response = await axiosInstance.post("/v1/uploads", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
+        thumbnailUrl = response.data.data.imageUrl;
+      }
+
+      const data = {
+        title: title.trim(),
+        content: content.trim(),
+        tags,
+        thumbnail: thumbnailUrl,
+        published: true,
+      };
+
+      console.log("전송할 데이터:", {
+        ...data,
+        file: thumbnail ? thumbnail.name : null,
+      });
+
+      postLpMutate(data, {
+        onSuccess: () => {
+          resetForm();
+          onClose();
+        },
+        onError: (error) => {
+          console.error("LP 추가 실패:", error);
+          console.log("요청 데이터:", data);
+        },
+      });
+    } catch (error) {
+      console.error("이미지 업로드 실패:", error);
     }
   };
 
@@ -47,6 +81,15 @@ const LpMakeModal = ({ isOpen, onClose }: LpMakeModalProps) => {
 
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setContent("");
+    setTags([]);
+    setTagInput("");
+    setThumbnail(null);
+    setImagePreview(null);
   };
 
   if (!isOpen) return null;
@@ -132,10 +175,7 @@ const LpMakeModal = ({ isOpen, onClose }: LpMakeModalProps) => {
 
         {/* 등록 버튼 */}
         <button
-          onClick={() => {
-            console.log({ title, content, tags, thumbnail });
-            handleSubmit();
-          }}
+          onClick={handlePostLp}
           className="w-full py-2 bg-gray-900 text-white rounded"
         >
           Add LP

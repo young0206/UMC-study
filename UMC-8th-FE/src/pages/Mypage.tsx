@@ -78,8 +78,10 @@ const Mypage = () => {
 
   return (
     <div className="mt-20">
+      <h1>{userInfo.avatar}</h1>
       <h1>{userInfo.name} 님, 환영합니다.</h1>
       <h1>{userInfo.email}</h1>
+      <h1>{userInfo.bio}</h1>
 
       <form onSubmit={handleProfileUpdate} className="space-y-4 mt-5">
         <div>

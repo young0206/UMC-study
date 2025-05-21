@@ -40,6 +40,19 @@ function usePostLike() {
 
       return { previousLpPost, newLpPost };
     },
+    onError: (err, lp, context) => {
+      if (context?.previousLpPost) {
+        queryClient.setQueryData(
+          [QUERY_KEY.lps, lp.lpid],
+          context.previousLpPost
+        );
+      }
+    },
+    onSettled: (data, error, lp) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.lps, lp.lpid],
+      });
+    },
   });
 }
 

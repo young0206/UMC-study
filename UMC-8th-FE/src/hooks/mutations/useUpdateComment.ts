@@ -3,15 +3,17 @@ import { updateComment } from "../../apis/comments";
 import { queryClient } from "../../App";
 import { QUERY_KEY } from "../../constants/key";
 
-function useUpdateComment() {
+const useUpdateComment = () => {
   return useMutation({
     mutationFn: updateComment,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('응답 확인:', data);
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.comments] as const,
+        queryKey: [QUERY_KEY.comments, data.data.lpId],
+        exact: true,
       });
     },
   });
-}
+};
 
 export default useUpdateComment;

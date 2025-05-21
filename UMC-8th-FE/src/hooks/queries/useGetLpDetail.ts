@@ -3,9 +3,9 @@ import { QUERY_KEY } from "../../constants/key";
 import { RequestLpDto } from "../../types/lp";
 import { getLpDetail } from "../../apis/lp";
 
-function useGetLpDetail({ lpid }: RequestLpDto) {
+function useGetLpDetail({ lpid, queryKey = QUERY_KEY.lpDetail }: RequestLpDto & { queryKey?: string }) {
   return useQuery({
-    queryKey: [QUERY_KEY.lps, lpid],
+    queryKey: [queryKey, lpid],
     queryFn: () => getLpDetail({ lpid }),
   });
 }

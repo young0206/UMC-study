@@ -25,14 +25,14 @@ export type Lp = {
 };
 
 export type RequestLpDto = {
-  lpid: number;
+  lpid?: number;
   title?: string;
   content?: string;
   tags?: string[];
   file?: File;
+  thumbnail?: string;
+  published?: boolean;
 };
-
-
 
 export type ResponseLpDto = CommonResponse<Lp>;
 

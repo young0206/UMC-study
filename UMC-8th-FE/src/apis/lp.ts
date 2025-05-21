@@ -1,6 +1,7 @@
 import { PaginationDto } from "../types/common";
 import { RequestLpDto, ResponseLikeLpDto, ResponseLpDto, ResponseLpListDto } from "../types/lp";
 import { axiosInstance } from "./axios";
+import { AxiosError } from "axios";
 
 export const getLpList = async (
   PaginationDto: PaginationDto
@@ -36,35 +37,70 @@ export const deleteLike = async ({
   return data;
 };
 
+export const deleteLp = async ({
+  lpid,
+}: RequestLpDto): Promise<ResponseLikeLpDto> => {
+  const { data } = await axiosInstance.delete(`/v1/lps/${lpid}`);
+
+  return data;
+};
+
+export const posteLp = async (): Promise<ResponseLikeLpDto> => {
+  const { data } = await axiosInstance.post(`/v1/lps`);
+
+  return data;
+};
+
+export const deleteAccount = async (
+): Promise<ResponseLikeLpDto> => {
+  const { data } = await axiosInstance.delete(`/v1/user`);
+
+  return data;
+};
+
+export const updateLp = async ({
+  lpid,
+  title,
+  content,
+  tags,
+}: RequestLpDto): Promise<ResponseLikeLpDto> => {
+  const { data } = await axiosInstance.patch(`/v1/lps/${lpid}`, {
+    title,
+    content,
+    tags,
+  });
+
+  return data;
+};
+
 export const postLp = async ({
   title,
   content,
   tags,
-  file,
+  thumbnail,
+  published,
 }: RequestLpDto): Promise<ResponseLpDto> => {
-  const formData = new FormData();
-
-  // 빈 값이 들어갈 경우 기본값을 설정
-  formData.append("title", title || "");
-  formData.append("content", content || "");
-  formData.append("tags", JSON.stringify(tags || [])); // tags가 없으면 빈 배열로 설정
-
-  // 파일이 있을 경우만 formData에 추가
-  if (file) {
-    formData.append("file", file);
-  }
-
   try {
-    const { data } = await axiosInstance.post("/v1/lps", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    console.log("전송할 데이터:", {
+      title,
+      content,
+      tags,
+      thumbnail,
+      published
     });
 
-    console.log("LP 추가 성공:", data);  // 성공 로그 확인
+    const { data } = await axiosInstance.post("/v1/lps", {
+      title,
+      content,
+      tags,
+      thumbnail,
+      published
+    });
+
+    console.log("LP 추가 성공:", data);
     return data;
   } catch (error) {
-    console.error("LP 추가 실패:", error);  // 오류 로그 확인
+    console.error("LP 추가 실패:", error);
     throw error;
   }
 };

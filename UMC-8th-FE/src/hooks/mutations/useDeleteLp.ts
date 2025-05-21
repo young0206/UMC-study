@@ -1,19 +1,19 @@
 import { useMutation } from "@tanstack/react-query";
-import { addComment } from "../../apis/comments";
+import { deleteLp } from "../../apis/lp";
 import { queryClient } from "../../App";
 import { QUERY_KEY } from "../../constants/key";
 
-const usePostComment = () => {
+function useDeleteLp() {
   return useMutation({
-    mutationFn: addComment,
+    mutationFn: deleteLp,
     onSuccess: (data) => {
-      console.log('응답 확인:', data);
+        console.log('응답 확인:', data);
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.comments, data.data.lpId],
+        queryKey: [QUERY_KEY.lps, data.data.lpId],
         exact: true,
       });
     },
   });
-};
+}
 
-export default usePostComment;
+export default useDeleteLp;
