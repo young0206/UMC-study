@@ -56,7 +56,6 @@ const LpDetailPage = () => {
           setIsEditing(false);
           queryClient.invalidateQueries({
             queryKey: [QUERY_KEY.lps, numericLpId],
-            exact: true,
           });
         },
         onError: (error: Error) => {

@@ -6,11 +6,11 @@ import { QUERY_KEY } from "../../constants/key";
 const useUpdateComment = () => {
   return useMutation({
     mutationFn: updateComment,
-    onSuccess: (data) => {
-      console.log('응답 확인:', data);
+    onSuccess: (_, variables) => {
+      console.log('댓글 수정 성공');
+      // 모든 정렬 순서에 대해 쿼리 무효화
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.comments, data.data.lpId],
-        exact: true,
+        queryKey: [QUERY_KEY.comments, variables.lpid],
       });
     },
   });

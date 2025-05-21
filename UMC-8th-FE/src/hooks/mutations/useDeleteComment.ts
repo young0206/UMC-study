@@ -8,6 +8,7 @@ const useDeleteComment = () => {
     mutationFn: deleteComment,
     onSuccess: (_, variables) => {
       console.log('댓글 삭제 성공');
+      // 모든 정렬 순서에 대해 쿼리 무효화
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.comments, variables.lpid],
       });

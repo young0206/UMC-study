@@ -64,13 +64,25 @@ export const updateLp = async ({
   content,
   tags,
 }: RequestLpDto): Promise<ResponseLikeLpDto> => {
-  const { data } = await axiosInstance.patch(`/v1/lps/${lpid}`, {
-    title,
-    content,
-    tags,
-  });
+  try {
+    console.log("수정할 데이터:", {
+      title,
+      content,
+      tags,
+    });
 
-  return data;
+    const { data } = await axiosInstance.patch(`/v1/lps/${lpid}`, {
+      title,
+      content,
+      tags,
+    });
+
+    console.log("LP 수정 성공:", data);
+    return data;
+  } catch (error) {
+    console.error("LP 수정 실패:", error);
+    throw error;
+  }
 };
 
 export const postLp = async ({
