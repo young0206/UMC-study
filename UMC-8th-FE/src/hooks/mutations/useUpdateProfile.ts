@@ -20,44 +20,29 @@ type UpdateProfilePayload = {
   name: string;
   bio: string;
   profileImage: File | null;
+  avatar?: string | null;
 };
 
 const updateUserProfile = async (data: {
   name: string;
   bio: string;
   profileImage: File | null;
+  avatar?: string | null;
 }): Promise<UpdateProfileResponse> => {
   try {
     let requestData;
     const headers: Record<string, string> = {};
-    let formDataInstance: FormData | null = null;
 
-    if (data.profileImage) {
-      // 이미지가 있을 경우 FormData 사용
-      formDataInstance = new FormData();
-      formDataInstance.append("name", data.name.trim());
-      formDataInstance.append("bio", data.bio.trim());
-      formDataInstance.append("profileImage", data.profileImage);
-      requestData = formDataInstance;
-      headers["Content-Type"] = "multipart/form-data";
-    } else {
-      // 이미지가 없을 경우 JSON으로 전송
-      requestData = {
-        name: data.name.trim(),
-        bio: data.bio.trim()
-      };
-      headers["Content-Type"] = "application/json";
-    }
+    // JSON으로 전송
+    requestData = {
+      name: data.name.trim(),
+      bio: data.bio.trim(),
+      avatar: data.avatar || null
+    };
+    headers["Content-Type"] = "application/json";
 
     // 전송할 데이터 로깅
-    console.log("전송할 데이터:", {
-      type: data.profileImage ? "FormData" : "JSON",
-      content: data.profileImage && formDataInstance ? {
-        name: formDataInstance.get("name"),
-        bio: formDataInstance.get("bio"),
-        profileImage: "File present"
-      } : requestData
-    });
+    console.log("전송할 데이터:", requestData);
 
     const response = await axiosInstance.patch<UpdateProfileResponse>(
       "/v1/users",
