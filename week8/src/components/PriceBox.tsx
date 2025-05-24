@@ -1,25 +1,23 @@
-// PriceBox.jsx
-
-import { useDispatch, useSelector } from "../hooks/useCustomRedux";
-import { clearCart } from "../slices/cartSlice";
-import { modalOpen, modalClose } from "../slices/modalSlice";
+import { useCartActions, useCartInfo } from "../hooks/useCartStore";
+import { useModalStore } from "../hooks/useModalStore";
 
 const PriceBox = () => {
-  const dispatch = useDispatch();
-  const { total } = useSelector((state) => state.cart);
-  const { isOpen } = useSelector((state) => state.modal);
+  const { clearCart, calculateTotals } = useCartActions();
+  const { total } = useCartInfo();
+  const { isOpen, modalOpen, modalClose } = useModalStore();
 
   const handleOpen = () => {
-    dispatch(modalOpen());
+    modalOpen();
   };
 
   const handleConfirm = () => {
-    dispatch(clearCart());
-    dispatch(modalClose());
+    clearCart();
+    calculateTotals();
+    modalClose();
   };
 
   const handleCancel = () => {
-    dispatch(modalClose());
+    modalClose();
   };
 
   return (
@@ -35,7 +33,7 @@ const PriceBox = () => {
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex justify-center items-center cursor-pointer">
           <div className="bg-white p-8 rounded-lg shadow-md text-center">
             <p className="mb-4">정말 삭제하시겠습니까?</p>
             <div className="flex justify-center gap-4">
